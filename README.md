@@ -3,15 +3,15 @@
 A local project navigator for developers. Type `guide` to fuzzy-search all your projects with AI-generated summaries, and jump into any of them instantly.
 
 ```
-  project >                                               Product/HaiblockApi
+  project >                                               backend/api
   ──────────────────────────────────────────────────────  ──────────────────────────────────────
-  workout-manager       Local-first workout tracking app  A Python API integrates with Haiblock.
-  Vibe                  AI-powered research workspace
-  haiblock-mvp          AI platform for brand visibility  git: main | 2 days ago — fix auth flow
-  Product/HaiblockApi   Python API for Haiblock platform
-  Product/demo          AI content optimization platform  Permissions Size  Name
-  mapmaker              Planet map creator for writers    drwxr-xr-x    -   frontend-service
-  AuthorTools           Worldbuilding tool for fiction    drwxr-xr-x    -   haiblock-python-sdk
+  my-saas-app           SaaS dashboard with billing       REST API for the main platform service.
+  research-tool         AI-powered research workspace
+  mobile-app            Cross-platform React Native app   git: main | 2 days ago — fix auth flow
+  backend/api           REST API for the main platform
+  backend/workers       Async job processing service      Permissions Size  Name
+  data-pipeline         ETL pipeline for analytics        drwxr-xr-x    -   src
+  side-project          Browser extension for bookmarks   drwxr-xr-x    -   tests
   ...                                                     drwxr-xr-x    -   scripts
 ```
 
@@ -70,7 +70,7 @@ guide
 |---|---|
 | `guide` | Open interactive fzf picker |
 | `guide map` | cd into the first project matching "map" |
-| `guide Product/demo` | cd into an exact sub-project |
+| `guide backend/api` | cd into an exact sub-project |
 | `guide <TAB>` | Tab-complete project names |
 | `dev-reindex` | Re-scan all projects and update summaries |
 
