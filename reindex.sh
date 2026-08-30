@@ -8,9 +8,11 @@ INDEX="$HOME/.dev_projects/index.json"
 MODEL="llama3.2:latest"
 OLLAMA_URL="http://localhost:11434/api/generate"
 
-# Prevent concurrent runs from corrupting the index
-exec 9>"$HOME/.dev_projects/.reindex.lock"
-flock -n 9 || { echo "reindex already running"; exit 0; }
+# Prevent concurrent runs from corrupting the index (flock on Linux; no-op on macOS)
+if command -v flock &>/dev/null; then
+  exec 9>"$HOME/.dev_projects/.reindex.lock"
+  flock -n 9 || { echo "reindex already running"; exit 0; }
+fi
 
 [[ ! -f "$INDEX" ]] && echo '{}' > "$INDEX"
 

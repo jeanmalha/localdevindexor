@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: shellcheck
+        run: |
+          sudo apt-get install -y shellcheck
+          shellcheck reindex.sh list.sh toggle-star.sh preview.sh edit-summary.sh install.sh
+
+      - name: zsh syntax check
+        run: |
+          sudo apt-get install -y zsh
+          zsh -n shell.zsh
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y jq bats
+
+      - name: Run tests
+        run: bats tests/

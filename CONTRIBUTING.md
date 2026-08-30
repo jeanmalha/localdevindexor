@@ -43,6 +43,17 @@ Open a PR against `main`. Keep it to one concern per PR.
 
 **Summaries stay local.** Nothing should send data to external services. `$OLLAMA_URL` must always resolve to loopback.
 
+## Release process
+
+Releases are gated on CI. The workflow is:
+
+1. Merge to `main` — CI (lint + tests) must be green
+2. Tag and release:
+   ```bash
+   make release VERSION=v0.2.0-beta.1
+   ```
+   This runs lint and tests locally first, then pushes the tag. GitHub Actions picks it up, runs CI again, and creates the GitHub release automatically. Tags containing `beta`, `alpha`, or `rc` are marked pre-release.
+
 ## What's in scope
 
 - Better project detection heuristics

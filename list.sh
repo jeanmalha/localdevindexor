@@ -37,5 +37,6 @@ while IFS=$'\t' read -r key path summary; do
 done < <(jq -r 'to_entries[] | [.key, .value.path, (.value.summary // "")] | @tsv' "$index" 2>/dev/null)
 
 # Starred first, each group sorted newest first; strip the sort-key prefix
-(( ${#starred[@]} > 0 )) && printf '%s\n' "${starred[@]}" | sort -r | cut -f2-
-(( ${#regular[@]} > 0 )) && printf '%s\n' "${regular[@]}" | sort -r | cut -f2-
+[ ${#starred[@]} -gt 0 ] && printf '%s\n' "${starred[@]}" | sort -r | cut -f2-
+[ ${#regular[@]} -gt 0 ] && printf '%s\n' "${regular[@]}" | sort -r | cut -f2-
+true
