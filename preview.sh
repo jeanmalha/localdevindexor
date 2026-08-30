@@ -31,12 +31,19 @@ if [[ -d "$project_path/.git" ]]; then
     git -C "$project_path" -c core.fsmonitor= log -1 --format="%ar — %s" 2>/dev/null)
   echo "git: $branch | $last_commit"
   echo ""
+  if [[ -n "$starred" ]]; then
+    recent_commits=$(jq -r --arg k "$project" '.[$k].recent_commits // ""' "$index" 2>/dev/null)
+    if [[ -n "$recent_commits" ]]; then
+      echo "Recent commits:"
+      echo "$recent_commits"
+      echo ""
+    fi
+  fi
 fi
 
 # List files (use eza if available, fallback to ls)
 if command -v eza &>/dev/null; then
   eza --icons --group-directories-first -lh "$project_path" 2>/dev/null | head -20
 else
-  # shellcheck disable=SC2012
   ls -lhA "$project_path" 2>/dev/null | head -20
 fi

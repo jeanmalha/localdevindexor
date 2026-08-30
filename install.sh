@@ -55,9 +55,9 @@ fi
 
 # Patch DEV_DIR in shell.zsh if not default
 if [[ "$dev_dir" != "$HOME/Documents/Dev" ]]; then
-  sed -i.bak "s|Documents/Dev|${dev_dir#$HOME/}|g" "$INSTALL_DIR/shell.zsh"
-  sed -i.bak "s|Documents/Dev|${dev_dir#$HOME/}|g" "$INSTALL_DIR/reindex.sh"
-  sed -i.bak "s|Documents/Dev|${dev_dir#$HOME/}|g" "$INSTALL_DIR/preview.sh"
+  sed -i.bak "s|Documents/Dev|${dev_dir#"$HOME"/}|g" "$INSTALL_DIR/shell.zsh"
+  sed -i.bak "s|Documents/Dev|${dev_dir#"$HOME"/}|g" "$INSTALL_DIR/reindex.sh"
+  sed -i.bak "s|Documents/Dev|${dev_dir#"$HOME"/}|g" "$INSTALL_DIR/preview.sh"
   rm -f "$INSTALL_DIR"/*.bak
 fi
 
@@ -75,9 +75,11 @@ if [[ -f "$SHELL_RC" ]] && grep -qF "$SOURCE_LINE" "$SHELL_RC"; then
   echo ""
   echo "Shell already configured ($SHELL_RC)."
 else
-  echo "" >> "$SHELL_RC"
-  echo "# localdevindexor — project navigator" >> "$SHELL_RC"
-  echo "$SOURCE_LINE" >> "$SHELL_RC"
+  {
+    echo ""
+    echo "# localdevindexor — project navigator"
+    echo "$SOURCE_LINE"
+  } >> "$SHELL_RC"
   echo ""
   echo "Added to $SHELL_RC."
 fi
