@@ -67,7 +67,8 @@ function guide() {
     --preview="~/.dev_projects/preview.sh {1}" \
     --preview-window="right:45%:wrap" \
     --bind="ctrl-s:execute-silent(bash ~/.dev_projects/toggle-star.sh {1})+reload(bash ~/.dev_projects/list.sh)" \
-    --header="enter:cd  ctrl-s:★ star  esc:cancel"
+    --bind="ctrl-e:execute(bash ~/.dev_projects/edit-summary.sh {1})+reload(bash ~/.dev_projects/list.sh)" \
+    --header="enter:cd  ctrl-s:★ star  ctrl-e:✎ edit desc  esc:cancel"
   )
 
   [[ -z "$selected" ]] && return

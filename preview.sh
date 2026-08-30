@@ -7,6 +7,7 @@ project_path=$(jq -r --arg k "$project" '.[$k].path // ""' "$index" 2>/dev/null)
 [[ -z "$project_path" ]] && project_path="$HOME/Documents/Dev/$project"
 
 summary=$(jq -r --arg k "$project" '.[$k].summary // ""' "$index" 2>/dev/null)
+source=$(jq -r --arg k "$project" '.[$k].source // "ai"' "$index" 2>/dev/null)
 starred=""
 grep -qxF "$project" "$stars_file" 2>/dev/null && starred=" ★"
 
@@ -15,6 +16,7 @@ echo "────────────────────────�
 
 if [[ -n "$summary" ]]; then
   echo "$summary"
+  [[ "$source" == "file" ]] && echo "(✎ from .dev-summary.md)" || echo "(✦ AI-generated  ctrl-e to edit)"
 else
   echo "(not indexed yet — run: dev-reindex)"
 fi

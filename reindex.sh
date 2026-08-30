@@ -29,6 +29,7 @@ is_project() {
 index_project() {
   local key="$1"      # relative path used as index key, e.g. "mapmaker" or "Product/demo"
   local dir="$2"      # absolute path to project dir
+  local summary_file="$dir/.dev-summary.md"
 
   last_mod=$(stat -f %m "$dir" 2>/dev/null || stat -c %Y "$dir" 2>/dev/null)
   existing_indexed=$(jq -r --arg k "$key" '.[$k].indexed_at // 0' "$INDEX" 2>/dev/null)
@@ -37,6 +38,23 @@ index_project() {
   if [[ -n "$existing_summary" && "$last_mod" -le "$existing_indexed" ]]; then
     skipped=$((skipped + 1))
     return
+  fi
+
+  # Priority: .dev-summary.md in the project root (user-editable, skips Ollama)
+  if [[ -f "$summary_file" ]]; then
+    local file_summary
+    file_summary=$(grep -v '^[[:space:]]*$' "$summary_file" 2>/dev/null \
+      | head -1 | tr -d '\000-\037' | sed 's/^[[:space:]]*//' | cut -c1-100)
+    if [[ -n "$file_summary" ]]; then
+      now=$(date +%s)
+      tmp=$(mktemp "${INDEX}.XXXXXX")
+      jq --arg k "$key" --arg path "$dir" --arg summary "$file_summary" --argjson now "$now" \
+        '.[$k] = {"path": $path, "summary": $summary, "indexed_at": $now, "source": "file"}' \
+        "$INDEX" > "$tmp" && mv "$tmp" "$INDEX"
+      echo "  [file] $key → $file_summary"
+      indexed=$((indexed + 1))
+      return
+    fi
   fi
 
   # Gather context — layered by signal strength
@@ -103,13 +121,20 @@ index_project() {
   [[ -z "$summary" ]] && { echo "  [skip] $key — empty model response"; return; }
   now=$(date +%s)
 
+  # Write to .dev-summary.md so the user can edit it, and gitignore it by default
+  printf '%s\n' "$summary" > "$summary_file"
+  local gitignore="$dir/.gitignore"
+  if [[ -f "$gitignore" ]] && ! grep -qxF '.dev-summary.md' "$gitignore"; then
+    printf '\n.dev-summary.md\n' >> "$gitignore"
+  fi
+
   # mktemp on same filesystem as INDEX so mv is atomic
   tmp=$(mktemp "${INDEX}.XXXXXX")
   jq --arg k "$key" --arg path "$dir" --arg summary "$summary" --argjson now "$now" \
-    '.[$k] = {"path": $path, "summary": $summary, "indexed_at": $now}' \
+    '.[$k] = {"path": $path, "summary": $summary, "indexed_at": $now, "source": "ai"}' \
     "$INDEX" > "$tmp" && mv "$tmp" "$INDEX"
 
-  echo "  [ok]   $key → $summary"
+  echo "  [ai]   $key → $summary"
   indexed=$((indexed + 1))
 }
 

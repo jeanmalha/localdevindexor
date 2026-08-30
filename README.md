@@ -27,6 +27,7 @@ A local project navigator for developers. Type `guide` to fuzzy-search all your 
 - **Nightly cron** — re-indexes modified projects every night so summaries stay fresh
 - **Last modified tag** — each project shows how long ago it was touched (5m ago, yesterday, Aug 15)
 - **Star projects** — press `ctrl-s` in the picker to star/unstar; starred projects always appear first
+- **Editable descriptions** — each project gets a `.dev-summary.md` file you can hand-edit; press `ctrl-e` in the picker to open it in `$EDITOR` and the list updates immediately
 - **fzf preview panel** — shows summary, star status, git branch + last commit, and file listing
 
 ## Requirements
@@ -78,7 +79,7 @@ guide
 | `guide <TAB>` | Tab-complete project names |
 | `dev-reindex` | Re-scan all projects and update summaries |
 
-Inside the fzf picker: type to filter, `enter` to cd, `ctrl-s` to toggle star, `esc` to cancel. Starred projects always float to the top.
+Inside the fzf picker: type to filter, `enter` to cd, `ctrl-s` to toggle star, `ctrl-e` to edit the project description, `esc` to cancel. Starred projects always float to the top.
 
 ## How it works
 
@@ -119,11 +120,14 @@ dev-reindex
 
 ```
 ~/.dev_projects/
-├── index.json        # project metadata and summaries (gitignored)
-├── stars             # list of starred project keys (gitignored)
-├── reindex.sh        # scanner + Ollama summarizer
-├── shell.zsh         # guide() function and tab completion
-├── list.sh           # generates the fzf list (age tags, starred-first sorting)
-├── preview.sh        # fzf preview panel helper
-└── toggle-star.sh    # called by fzf ctrl-s to star/unstar a project
+├── index.json          # project metadata and summaries (gitignored)
+├── stars               # list of starred project keys (gitignored)
+├── reindex.sh          # scanner + Ollama summarizer
+├── shell.zsh           # guide() function and tab completion
+├── list.sh             # generates the fzf list (age tags, starred-first sorting)
+├── preview.sh          # fzf preview panel helper
+├── toggle-star.sh      # called by fzf ctrl-s to star/unstar a project
+└── edit-summary.sh     # called by fzf ctrl-e to edit .dev-summary.md
 ```
+
+Each project also gets a `.dev-summary.md` written to its own directory after the first index. This file is gitignored by default (reindex adds it to the project's `.gitignore` if one exists) and takes priority over the AI-generated summary on subsequent runs. Edit it directly or press `ctrl-e` in the picker.
