@@ -1,5 +1,7 @@
 # localdevindexor
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A local project navigator for developers. Type `guide` to fuzzy-search all your projects with AI-generated summaries, and jump into any of them instantly.
 
 ```
@@ -23,7 +25,9 @@ A local project navigator for developers. Type `guide` to fuzzy-search all your 
 - **Two-level scanning** — detects container folders and indexes their sub-projects individually
 - **AI summaries** — uses a local Ollama model to generate one-line descriptions automatically
 - **Nightly cron** — re-indexes modified projects every night so summaries stay fresh
-- **fzf preview panel** — shows summary, git branch + last commit, and file listing
+- **Last modified tag** — each project shows how long ago it was touched (5m ago, yesterday, Aug 15)
+- **Star projects** — press `ctrl-s` in the picker to star/unstar; starred projects always appear first
+- **fzf preview panel** — shows summary, star status, git branch + last commit, and file listing
 
 ## Requirements
 
@@ -74,7 +78,7 @@ guide
 | `guide <TAB>` | Tab-complete project names |
 | `dev-reindex` | Re-scan all projects and update summaries |
 
-Inside the fzf picker: type to filter, `enter` to cd, `esc` to cancel.
+Inside the fzf picker: type to filter, `enter` to cd, `ctrl-s` to toggle star, `esc` to cancel. Starred projects always float to the top.
 
 ## How it works
 
@@ -115,8 +119,11 @@ dev-reindex
 
 ```
 ~/.dev_projects/
-├── index.json      # project metadata and summaries (gitignored)
-├── reindex.sh      # scanner + Ollama summarizer
-├── shell.zsh       # guide() function and tab completion
-└── preview.sh      # fzf preview panel helper
+├── index.json        # project metadata and summaries (gitignored)
+├── stars             # list of starred project keys (gitignored)
+├── reindex.sh        # scanner + Ollama summarizer
+├── shell.zsh         # guide() function and tab completion
+├── list.sh           # generates the fzf list (age tags, starred-first sorting)
+├── preview.sh        # fzf preview panel helper
+└── toggle-star.sh    # called by fzf ctrl-s to star/unstar a project
 ```

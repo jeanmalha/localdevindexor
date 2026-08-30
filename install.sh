@@ -29,10 +29,14 @@ fi
 echo ""
 echo "Installing to $INSTALL_DIR ..."
 mkdir -p "$INSTALL_DIR"
-cp reindex.sh "$INSTALL_DIR/reindex.sh"
-cp shell.zsh  "$INSTALL_DIR/shell.zsh"
-cp preview.sh "$INSTALL_DIR/preview.sh"
-chmod +x "$INSTALL_DIR/reindex.sh" "$INSTALL_DIR/preview.sh"
+cp reindex.sh     "$INSTALL_DIR/reindex.sh"
+cp shell.zsh      "$INSTALL_DIR/shell.zsh"
+cp preview.sh     "$INSTALL_DIR/preview.sh"
+cp list.sh        "$INSTALL_DIR/list.sh"
+cp toggle-star.sh "$INSTALL_DIR/toggle-star.sh"
+chmod +x "$INSTALL_DIR/reindex.sh" "$INSTALL_DIR/preview.sh" \
+         "$INSTALL_DIR/list.sh" "$INSTALL_DIR/toggle-star.sh"
+touch "$INSTALL_DIR/stars"
 
 [[ ! -f "$INSTALL_DIR/index.json" ]] && echo '{}' > "$INSTALL_DIR/index.json"
 

@@ -46,17 +46,9 @@ function guide() {
     return 1
   fi
 
-  # No argument: fzf picker sorted by real filesystem mtime (most recently touched first)
+  # No argument: fzf picker (starred first, then by mtime)
   local list
-  list=$(
-    jq -r 'to_entries[] | [.key, .value.path, (.value.summary // "")] | @tsv' "$index" 2>/dev/null \
-    | while IFS=$'\t' read -r key path summary; do
-        mtime=$(stat -f %m "$path" 2>/dev/null || echo 0)
-        printf "%s\t%-30s  %s\n" "$mtime" "$key" "$summary"
-      done \
-    | sort -rn \
-    | cut -f2-
-  )
+  list=$(bash ~/.dev_projects/list.sh)
 
   if [[ -z "$list" ]]; then
     echo "No projects indexed yet — run: dev-reindex"
@@ -69,14 +61,18 @@ function guide() {
     --height=60% \
     --reverse \
     --ansi \
-    --preview="~/.dev_projects/preview.sh \$(echo {} | awk '{print \$1}')" \
+    --delimiter=$'\t' \
+    --with-nth=2 \
+    --nth=2 \
+    --preview="~/.dev_projects/preview.sh {1}" \
     --preview-window="right:45%:wrap" \
-    --header="enter:cd  esc:cancel"
+    --bind="ctrl-s:execute-silent(bash ~/.dev_projects/toggle-star.sh {1})+reload(bash ~/.dev_projects/list.sh)" \
+    --header="enter:cd  ctrl-s:★ star  esc:cancel"
   )
 
   [[ -z "$selected" ]] && return
   local key
-  key=$(echo "$selected" | awk '{print $1}')
+  key=$(printf '%s' "$selected" | cut -f1)
   _guide_cd "$key"
 }
 

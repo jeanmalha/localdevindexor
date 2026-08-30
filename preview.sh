@@ -1,12 +1,16 @@
 #!/bin/bash
 project="$1"
 index="$HOME/.dev_projects/index.json"
-dev_dir="$HOME/Documents/Dev"
-project_path="$dev_dir/$project"
+stars_file="$HOME/.dev_projects/stars"
 
-summary=$(jq -r ".[\"$project\"].summary // \"\"" "$index" 2>/dev/null)
+project_path=$(jq -r --arg k "$project" '.[$k].path // ""' "$index" 2>/dev/null)
+[[ -z "$project_path" ]] && project_path="$HOME/Documents/Dev/$project"
 
-echo "$project"
+summary=$(jq -r --arg k "$project" '.[$k].summary // ""' "$index" 2>/dev/null)
+starred=""
+grep -qxF "$project" "$stars_file" 2>/dev/null && starred=" ★"
+
+echo "$project$starred"
 echo "────────────────────────────────────────"
 
 if [[ -n "$summary" ]]; then
@@ -17,7 +21,7 @@ fi
 
 echo ""
 
-# Show git status if it's a repo
+# Show git info if it's a repo
 if [[ -d "$project_path/.git" ]]; then
   branch=$(git -C "$project_path" branch --show-current 2>/dev/null)
   last_commit=$(git -C "$project_path" log -1 --format="%ar — %s" 2>/dev/null)
