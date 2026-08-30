@@ -8,6 +8,10 @@ INDEX="$HOME/.dev_projects/index.json"
 MODEL="llama3.2:latest"
 OLLAMA_URL="http://localhost:11434/api/generate"
 
+# Prevent concurrent runs from corrupting the index
+exec 9>"$HOME/.dev_projects/.reindex.lock"
+flock -n 9 || { echo "reindex already running"; exit 0; }
+
 [[ ! -f "$INDEX" ]] && echo '{}' > "$INDEX"
 
 indexed=0
@@ -52,7 +56,8 @@ index_project() {
 
   # Git log (commit messages are often the best description)
   if [[ -d "$dir/.git" ]]; then
-    gitlog=$(git -C "$dir" log --oneline -8 2>/dev/null)
+    gitlog=$(GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+      git -C "$dir" -c core.fsmonitor= log --oneline -8 2>/dev/null)
     [[ -n "$gitlog" ]] && context+="=== Recent commits ===\n$gitlog\n\n"
   fi
 
@@ -92,10 +97,14 @@ index_project() {
     return
   fi
 
-  summary=$(echo "$response" | jq -r '.response' | tr -d '\n' | sed 's/^[[:space:]]*//' | cut -c1-100)
+  # Strip control characters (incl. ANSI escapes) before storing
+  summary=$(echo "$response" | jq -r '.response // empty' \
+    | tr -d '\000-\037' | sed 's/^[[:space:]]*//' | cut -c1-100)
+  [[ -z "$summary" ]] && { echo "  [skip] $key — empty model response"; return; }
   now=$(date +%s)
 
-  tmp=$(mktemp)
+  # mktemp on same filesystem as INDEX so mv is atomic
+  tmp=$(mktemp "${INDEX}.XXXXXX")
   jq --arg k "$key" --arg path "$dir" --arg summary "$summary" --argjson now "$now" \
     '.[$k] = {"path": $path, "summary": $summary, "indexed_at": $now}' \
     "$INDEX" > "$tmp" && mv "$tmp" "$INDEX"
@@ -145,7 +154,7 @@ while IFS= read -r key; do
     [[ "$seen" == "$key" ]] && found=true && break
   done
   if ! $found; then
-    tmp=$(mktemp)
+    tmp=$(mktemp "${INDEX}.XXXXXX")
     jq --arg k "$key" 'del(.[$k])' "$INDEX" > "$tmp" && mv "$tmp" "$INDEX"
     echo "  [rm]   $key (no longer exists)"
   fi

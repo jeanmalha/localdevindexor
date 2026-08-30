@@ -23,8 +23,10 @@ echo ""
 
 # Show git info if it's a repo
 if [[ -d "$project_path/.git" ]]; then
-  branch=$(git -C "$project_path" branch --show-current 2>/dev/null)
-  last_commit=$(git -C "$project_path" log -1 --format="%ar — %s" 2>/dev/null)
+  branch=$(GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+    git -C "$project_path" -c core.fsmonitor= branch --show-current 2>/dev/null)
+  last_commit=$(GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+    git -C "$project_path" -c core.fsmonitor= log -1 --format="%ar — %s" 2>/dev/null)
   echo "git: $branch | $last_commit"
   echo ""
 fi
