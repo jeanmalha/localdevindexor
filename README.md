@@ -1,7 +1,7 @@
 # localdevindexor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.1-blue.svg)](https://github.com/jeanmalha/localdevindexor/releases)
+[![Version](https://img.shields.io/badge/version-0.1.0--beta.2-blue.svg)](https://github.com/jeanmalha/localdevindexor/releases)
 
 > **Beta** — works well day-to-day but the index format and keybindings may change before v1.0.
 
@@ -29,9 +29,9 @@ A local project navigator for developers. Type `guide` to fuzzy-search all your 
 - **AI summaries** — uses a local Ollama model to generate one-line descriptions automatically
 - **Nightly cron** — re-indexes modified projects every night so summaries stay fresh
 - **Last modified tag** — each project shows how long ago it was touched (5m ago, yesterday, Aug 15)
-- **Star projects** — press `ctrl-s` in the picker to star/unstar; starred projects always appear first
+- **Star projects** — press `ctrl-s` in the picker to star/unstar; starred projects always appear first and get deeper indexing (see below)
 - **Editable descriptions** — each project gets a `.dev-summary.md` file you can hand-edit; press `ctrl-e` in the picker to open it in `$EDITOR` and the list updates immediately
-- **fzf preview panel** — shows summary, star status, git branch + last commit, and file listing
+- **fzf preview panel** — shows summary, star status, git branch + last commit, file listing; starred projects also show a full 10-entry recent commit log
 
 ## Requirements
 
@@ -95,7 +95,11 @@ Inside the fzf picker: type to filter, `enter` to cd, `ctrl-s` to toggle star, `
 4. First 30 lines of main source file
 5. File tree
 
-**Summarization**: sends context to a local Ollama model with a strict system prompt that forces a single sentence output regardless of how sparse the context is. Incremental — only re-indexes projects modified since the last run.
+Starred projects get deeper context: 2× more README content (120 lines), 2× more config content (40 lines), 20 recent commits instead of 8, main source files are always included, and the file tree shows up to 50 entries.
+
+**Summarization**: sends context to a local Ollama model with a strict system prompt that forces a single sentence output regardless of how sparse the context is. Incremental — only re-indexes projects modified since the last run. For starred git repos, the last commit timestamp is also checked, so new commits trigger a re-index even when the directory mtime hasn't changed.
+
+**Recent commits** (starred projects only): after indexing, the 10 most recent commits (date + message) are stored in `index.json` and shown in the fzf preview panel under "Recent commits:".
 
 **Navigation** (`shell.zsh`): the `guide` function reads the index, builds a list sorted by real filesystem mtime, and pipes it to fzf. Selecting a project calls `cd` using the stored absolute path.
 
