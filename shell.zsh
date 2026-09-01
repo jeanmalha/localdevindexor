@@ -63,7 +63,6 @@ function guide() {
     --ansi \
     --delimiter=$'\t' \
     --with-nth=2 \
-    --nth=2 \
     --preview="~/.dev_projects/preview.sh {1}" \
     --preview-window="right:45%:wrap" \
     --bind="ctrl-s:execute-silent(bash ~/.dev_projects/toggle-star.sh {1})+reload(bash ~/.dev_projects/list.sh)" \
