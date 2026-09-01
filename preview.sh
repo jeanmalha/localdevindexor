@@ -45,5 +45,7 @@ fi
 if command -v eza &>/dev/null; then
   eza --icons --group-directories-first -lh "$project_path" 2>/dev/null | head -20
 else
+  # ls formatting (-lhA) is intentional here; find would lose it.
+  # shellcheck disable=SC2012
   ls -lhA "$project_path" 2>/dev/null | head -20
 fi

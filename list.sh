@@ -17,7 +17,8 @@ _NOW=$(date +%s)
 # Sets global AGE from an epoch mtime. Written to avoid a command-substitution
 # subshell per project; only the >1-week branch forks (once, for `date`).
 format_age() {
-  local mtime="$1" diff=$(( _NOW - mtime ))
+  local mtime="$1"
+  local diff=$(( _NOW - mtime ))
   if   (( diff < 60 ));      then AGE="just now"
   elif (( diff < 3600 ));    then AGE="$(( diff / 60 ))m ago"
   elif (( diff < 86400 ));   then AGE="$(( diff / 3600 ))h ago"
