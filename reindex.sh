@@ -9,9 +9,19 @@ MODEL="llama3.2:latest"
 OLLAMA_URL="http://localhost:11434/api/generate"
 STARS_FILE="$HOME/.dev_projects/stars"
 
-# Prevent concurrent runs from corrupting the index
-exec 9>"$HOME/.dev_projects/.reindex.lock"
-flock -n 9 || { echo "reindex already running"; exit 0; }
+# Prevent concurrent runs from corrupting the index.
+# Use flock where available (Linux); fall back to an atomic mkdir lock on
+# systems without it (e.g. macOS, which ships no flock).
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$HOME/.dev_projects/.reindex.lock"
+  flock -n 9 || { echo "reindex already running"; exit 0; }
+else
+  LOCKDIR="$HOME/.dev_projects/.reindex.lock.d"
+  if ! mkdir "$LOCKDIR" 2>/dev/null; then
+    echo "reindex already running"; exit 0
+  fi
+  trap 'rmdir "$LOCKDIR" 2>/dev/null' EXIT INT TERM
+fi
 
 [[ ! -f "$INDEX" ]] && echo '{}' > "$INDEX"
 
